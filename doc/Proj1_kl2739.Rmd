@@ -184,15 +184,22 @@ shinyApp(
 )
 ```
 
+#Quantifying Frequencies of Words:  
+Of course it is great to be able to visualize the significant words, but we may also want to quantify the frequencies of significant words. Let's look at the breakdown of frequencies of the 20 most frequently used words across all the inauguration speeches. Here, they are sorted in descending order. So, while the wordclouds gives us a visual in terms of darkness of color and size of the word, we can also consider the numerical difference.   
 ```{r}
 freq<-rowSums(as.matrix(tdm.all))
 head(sort(freq,decreasing=T),20)
 ```
-
+  
+Notice that "will" has a frequency of 912, which is significantly greater than the second most frequently-used word, "people", which only comes to a total of 567 appearances. We get a slightly different understanding of the differing frequncies between the uppermost percentile of frequently-used words in inauguration speeches. This is a more tangible representation.  
+  
+Additionally, we can look at all the terms that have a frequency greater than 125 across all the US presidential inauguration speeches.  
 ```{r}
 findFreqTerms(tdm.all,lowfreq = 125)
 ```
-
+  
+There are 48 words with a frequency of 125 or higher across all the inauguration speeches. It doesn't appear that any of the words are unusual, in the sense that it's surprising the word would be in an inauguration speech. Though, I do notice that "men" appears in this list of frequently used words, while "women" does not.  
+  
 ```{r}
 #plot word frequencies
 library(ggplot2)
