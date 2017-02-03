@@ -49,6 +49,7 @@ library(xlsx)
 
 
 source("../lib/Functions.R")
+source("../lib/Functions.2.R")
 ```
 This notebook was prepared with the following environmental settings.
 
@@ -374,17 +375,13 @@ ui <- fluidPage(
   
   fluidRow(
     column(3, 
-         textInput("term1", label = "Keyword 1", value="", 
-                   placeholder="e.g., women")),
+         textInput("term1", label = "Keyword 1", value="women")),
     column(3,
-         textInput("term2", label = "Keyword 2", value="", 
-                   placeholder="e.g., woman")),
+         textInput("term2", label = "Keyword 2", value="woman")),
     column(3,
-         textInput("term3", label = "Keyword 3", value="", 
-                   placeholder="e.g., girls")),
+         textInput("term3", label = "Keyword 3", value="girls")),
     column(3,
-         textInput("term4", label = "Keyword 4", value="", 
-                   placeholder="e.g., girl")),
+         textInput("term4", label = "Keyword 4", value="girl")),
   
     actionButton("continue",label="Continue")
   ),
@@ -396,43 +393,62 @@ ui <- fluidPage(
   
   fluidRow(
     h3("Words Associated with Keywords in US Presidential Inauguration Speeches"),
-    dataTableOutput("speeches.input")
+    verbatimTextOutput("assoc.input")
   ),
   
   fluidRow(
     h3("Table of Speeches that Contain the Keywords, Including Full Text"),
-    dataTableOutput("dated.speeches.input.f")
+    tableOutput("dated.speeches.input.f")
   ),
   
   fluidRow(
     h3("Data from Sentiment Analysis on Sentences Containing Keywords"),
-    dataTableOutput("sentence.list.input")
+    verbatimTextOutput("sentence.list.input")
   )
-)
+ )
+
 
 server <- function(input,output,session){
   term.vector <- reactive({c(as.character(input$term1),
                              as.character(input$term2),
                              as.character(input$term3),
                              as.character(input$term4))})
-  
+ 
   tdm.tidy.input <- reactive({get.tdm.tidy.term(tdm.tidy,term.vector())})
   output$instances.input <- 
     renderDataTable({get.instances(tdm.tidy.input())})
   
-  speeches.input <- reactive({get.speeches(tdm.tidy.input())})
-  output$speeches.input <- renderDataTable(speeches.input)
+  speeches.input <- reactive({get.instances(tdm.tidy.input())[,1]})
   ff.input <- reactive({get.ff.term(folder.path,speeches.input())})
-  output$assoc.input <- renderDataTable({assoc.words(folder.path,
-                                                      speeches.input(),x=10)})
+  output$assoc.input <- renderPrint({
+    speeches <- speeches.input() 
+    assoc.words(folder.path, speeches,x=10)
+    })
+
+  
   dated.speeches.input <- reactive({get.speech.date(speeches.input())})
-  dated.speeches.input.f <- reactive({full.text(ff.input(), 
-                                        dated.speeches.input())})
-  output$dated.speeches.input.f <- renderDataTable(dated.speeches.input.f)
-  sentence.list.f <- reactive({get.sentences(dated.speeches.input.f)})
-  sentence.list.input <- reactive({get.sentences.term(sentence.list.f(),
-                              term.vector())})
-  output$sentence.list.input <- renderDataTable(sentence.list.input)
+  
+  output$dated.speeches.input.f <- renderTable({
+    ff. <- ff.input()
+    dated.speeches. <- dated.speeches.input()
+    full.text(ff.,dated.speeches.)
+    })
+
+  dated.speeches.input.f <- reactive({
+    ff. <- ff.input()
+    dated.speeches. <- dated.speeches.input()
+    full.text(ff.,dated.speeches.)
+    })
+  sentence.list.f <- reactive({
+    d.s.input.f <- dated.speeches.input.f()
+    get.sentences(d.s.input.f)
+    })
+
+  output$sentence.list.input <- renderPrint({
+    sent.l.f <- sentence.list.f()
+    term.v <- term.vector()
+    get.sentences.term(sent.l.f,term.v)
+    })
 }
 
 shinyApp(ui=ui,server=server)
