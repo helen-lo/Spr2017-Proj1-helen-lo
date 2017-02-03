@@ -366,47 +366,50 @@ It appears women are mentioned only once in Clinton's entire speech. In the cont
 library(shiny)
 folder.path="../data/InauguralSpeeches/"
 
-ui <- fluidPage(
-  titlePanel("US Presidential Inauguration Speeches:"), 
-  h2("Exploratory Analysis of Keywords in Presidential Inauguration Speeches"),
-  hr(),
-  p("Let's explore the diction of inauguration speeches: What words are popularly chosen? What words are a bit contended? Can we learn anything about a specific inauguration speech and more generally a specific president's term by doing a close analysis of the sentences in which certain keywords are explicitely used? In what context are certain keywords used? And how does the sentiment or emotion behind the sentence that contains a keyword change as the context changes? Can we make any generalizations about word choice in presidential inauguration speeches?"),
-  p("Below, enter four keywords you may (or may not) expect to find in a presidential inauguration speech: "),
-  
-  fluidRow(
-    column(3, 
-         textInput("term1", label = "Keyword 1", value="women")),
-    column(3,
-         textInput("term2", label = "Keyword 2", value="woman")),
-    column(3,
-         textInput("term3", label = "Keyword 3", value="girls")),
-    column(3,
-         textInput("term4", label = "Keyword 4", value="girl")),
-  
-    actionButton("continue",label="Continue")
-  ),
-  
-  fluidRow(
-    h3("Incidences of Keywords in US Presidential Inauguration Speeches"),
-    dataTableOutput("instances.input")
-  ),
-  
-  fluidRow(
-    h3("Words Associated with Keywords in US Presidential Inauguration Speeches"),
-    verbatimTextOutput("assoc.input")
-  ),
-  
-  fluidRow(
-    h3("Table of Speeches that Contain the Keywords, Including Full Text"),
-    tableOutput("dated.speeches.input.f")
-  ),
-  
-  fluidRow(
-    h3("Data from Sentiment Analysis on Sentences Containing Keywords"),
-    verbatimTextOutput("sentence.list.input")
-  )
- )
-
+ui <- navbarPage("Applied Data Science: Project 1",
+             titlePanel("US Presidential Inauguration Speeches:"), 
+             h2("Exploratory Analysis of Keywords in Presidential
+                Inauguration Speeches"),
+             hr(),
+             p("Let's explore the diction of inauguration speeches: 
+               What words are popularly chosen? What words are a bit contended? 
+               Can we learn anything about a specific inauguration speech and more
+               generally a specific president's term by doing a close analysis of
+               the sentences in which certain keywords are explicitely used? In what
+               context are certain keywords used? And how does the sentiment or
+               emotion behind the sentence that contains a keyword change as the
+               context changes? Can we make any generalizations about word choice
+               in presidential inauguration speeches?"),
+             p("Below, enter four keywords you may (or may not) expect to find in 
+               a presidential inauguration speech: "), 
+            fluidRow(
+              column(3, textInput("term1", label = "Keyword 1", value="women")),
+              column(3, textInput("term2", label = "Keyword 2", value="woman")),
+              column(3, textInput("term3", label = "Keyword 3", value="girls")),
+              column(3, textInput("term4", label = "Keyword 4", value="girl")),
+              br(),hr()),
+            fixedRow(
+              column(12,align="center",actionButton("continue",label="Continue")),
+              tags$style(type='text/css', "#continue { vertical-align: middle; height: 50px; width: 100%; font-size: 30px;}")
+              ),
+          
+       tabsetPanel(position="below",      
+        tabPanel("Data 1",
+           h3("Incidences of Keywords in US Presidential Inauguration Speeches"),
+           dataTableOutput("instances.input")),
+        tabPanel("Data 2",
+                 h3("Words Associated with Keywords in US Presidential Inauguration
+                    Speeches"),
+                 verbatimTextOutput("assoc.input")),
+        tabPanel("Data 3",
+                 h3("Table of Speeches that Contain the Keywords, Including Full
+                    Text"),
+                 tableOutput("dated.speeches.input.f")),
+        tabPanel("Data 4",
+                 h3("Data from Sentiment Analysis on Sentences Containing
+                    Keywords"),
+                 verbatimTextOutput("sentence.list.input"))))
+             
 
 server <- function(input,output,session){
   term.vector <- reactive({c(as.character(input$term1),
