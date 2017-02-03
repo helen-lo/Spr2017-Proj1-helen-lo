@@ -1,14 +1,17 @@
 ---
 title: "Proj1_kl2739"
+author: Ka Heng (Helen) Lo
 runtime: shiny
 output: html_notebook
 ---
+#Intro:  
+This is a partly interactive R Markdown Notebook. The first part involves broad and close analyses of presidential inauguration speeches, while the second (interactive) part expands on ideas in the first part to allow for a more general application of close analysis ideas on user-selected subsets of the data on inaugural speeches. 
+  
+#Set-Up: Install & Load Libraries; Set Preliminary Knitr Setting Options  
 ```{r "setup", include=FALSE}
 require("knitr")
 opts_knit$set(root.dir = "~/Desktop/Applied Data Science/Proj1")
-```
 
-```{r}
 used <- c("tm", "SnowballC", "RColorBrewer", "ggplot2", "wordcloud", "biclust",
           "cluster", "igraph", "fpc", "dplyr", "plyr", "tidytext", "stringr", 
           "rvest", "tibble", "qdap", "sentimentr", "gplots",
@@ -51,13 +54,15 @@ library(xlsx)
 source("../lib/Functions.R")
 source("../lib/Functions.2.R")
 ```
-This notebook was prepared with the following environmental settings.
 
+*Note*: This notebook was prepared with the following environmental settings.  
 ```{r}
 print(R.version)
 ```
   
-```{r}
+#More Set-Up: Read in the Speeches & the 'InaugurationDates.txt' File  
+```{r} 
+##Create global variables: 
 #Read in the speeches
 folder.path="../data/InauguralSpeeches/"
 speeches=list.files(path = folder.path, pattern = "*.txt")
@@ -66,14 +71,11 @@ prex.out=substr(speeches, 6, nchar(speeches)-4)
 ff.all<-Corpus(DirSource(folder.path))
 
 #Reading in InaugurationDates.txt; global variable for dates data
-dates <- read.delim("../data/InaugurationDates.txt")
-#dates
+dates <- read.delim("../data/InaugurationDates.txt") ; #dates
 ```
 
-#Step 2 - Text processing, pre-processing stage
-
-For the speeches, we remove extra white space, convert all letters to the lower case, remove [stop words](https://github.com/arc12/Text-Mining-Weak-Signals/wiki/Standard-set-of-english-stopwords), removed empty words due to formatting errors, and remove punctuation. Then we compute the [Document-Term Matrix (DTM)](https://en.wikipedia.org/wiki/Document-term_matrix). 
-
+#Pre-Processing Text:  (Guided by in-class Tutorial)
+For the speeches, we remove extra white space, convert all letters to the lower case, remove [stop words](https://github.com/arc12/Text-Mining-Weak-Signals/wiki/Standard-set-of-english-stopwords), removed empty words due to formatting errors, and remove punctuation. Essentially, we have only the *significant* words of each speech left to work with. Then we compute the Document-Term Matrix (DTM) and its transpose, the Term-Document Matrix (TDM).  
 ```{r}
 #preprocessing data
 ff.all<-tm_map(ff.all, stripWhitespace)
@@ -87,10 +89,12 @@ ff.all<-tm_map(ff.all, removePunctuation)
 tdm.all<-TermDocumentMatrix(ff.all)
 tdm.tidy=tidy(tdm.all)
 
+#Apply/Split/Combine Method to aggregate sums 
 tdm.overall=ddply(tdm.tidy,.(term),summarise,total_count=sum(count))
 ```
 
-#Step 3 - Inspect an overall wordcloud
+#Inspect an Overall Wordcloud:  
+Now that we've essentially cleaned our data, we can work with it. The easiest way to visualize our data is to create a wordcloud (following the tutorial from class). Since we're just starting our exploration of our data, let's just look at a wordcloud for all the significant words in all the presidential inaugural speeches. 
 ```{r, fig.height=6, fig.width=6}
 wordcloud(tdm.overall$term, tdm.overall$total_count,
           scale=c(5,0.5),
@@ -102,10 +106,11 @@ wordcloud(tdm.overall$term, tdm.overall$total_count,
           random.color=FALSE,
           colors=brewer.pal(9,"Blues"))
 ```
+  
+Notice that the words that pop out the most are very commonly associated with hope, strength, and status: "will", "people", "can", "states", "great", "nation", "world", "may", "freedom", etc. It is not very surprising that these are the words that appear most frequently across all the US presidential inauguration speeches. While this is not new information, we get minor relief that our preliminary assumptions are confirmed.  
 
-
-#Step 4 - compute TF-IDF weighted document-term matrices for individual speeches. 
-As we would like to identify interesting words for each inaugural speech, we use [TF-IDF](https://en.wikipedia.org/wiki/Tf%E2%80%93idf) to weigh each term within each speech. It highlights terms that are more specific for a particular speech. 
+#Compute TF-IDF Weighted Document-Term Matrices for Individual Speeches: (from class)  
+As we would like to identify interesting words for each inaugural speech, we use [TF-IDF](https://en.wikipedia.org/wiki/Tf%E2%80%93idf) to weigh each term within each speech. It highlights terms that are more specific for a particular speech. Additionally, we use the function *tidy()* from the *tidytext* package to shape our dataset into the most useable format.  
 
 ```{r}
 dtm <- DocumentTermMatrix(ff.all,
@@ -116,7 +121,8 @@ dtm <- DocumentTermMatrix(ff.all,
 ff.dtm=tidy(dtm)
 ```
 
-#Step 5- Interactive visualize important words in individual speeches
+#Interactive:  Visualize Important Words in Individual Speeches  
+We envoke the *shiny* library in *R* to give us an interactive experience when visualizing significant words from individual speeches. Essentially, we using the *shinyApp()* function we can allow users to choose two speeches whose wordcloud they want to compare side by side. In a new interactive window, we can choose two speeches - one from each drop-down menu - and the two respective wordclouds appear side-by-side for easy visual comparison.  
 ```{r, warning=FALSE}
 library(shiny)
 library(rsconnect)
