@@ -212,7 +212,7 @@ p
 ```
 
 
-#Subsetting the Data:  
+#Subsetting the Data: Look at Speechs Containing Keywords  
 Since I noticed that "men" appears more that 125 times while "women" does not, I decided to find out how many times "women", and what I call its equivalents, "woman", "girls","girl", appear. Additionally, I was curious as to which particular speeches mentioned women. So in subsetting the data, we can get a closer look at the specific speeches that mention women and even the specific sentences in those speeches that explicitly use the word "women" or its equivalents.   
 ```{r}
 #Select a class of equivalent terms; in this case, we look at "women"
@@ -247,8 +247,7 @@ ff.women <- get.ff.term(folder.path,speeches.women)
     #specifically, we get a dataframe of the filename of each speech that mentions       "women" and the date of address, ordered by year in ascending order from top to      bottom
 (dated.speeches.women <- get.speech.date(speeches.women))
 ```
-
-# Get sentences with "women" in it from each speech  
+  
 ```{r}
 #Use full.text(ff.term, dated.speeches.term) to get a dataframe with 3 columns: Speech, Date, Full Speech Text
   #each row in the dataframe corresponds to one of the inaugural speeches that        contain "women" or its equivalents, in term.vector
@@ -259,11 +258,9 @@ file.name <- "../output/dated.speeches.women.xlsx"
 write.xlsx(dated.speeches.women.f,file.name,row.names=F)
 
 ```
-# Step 4: data Processing --- generate list of sentences
-
-We will use sentences as units of analysis for this project, as sentences are natural languge units for organizing thoughts and ideas. For each extracted sentence, we apply sentiment analysis using [NRC sentiment lexion](http://saifmohammad.com/WebPages/NRC-Emotion-Lexicon.htm). "The NRC Emotion Lexicon is a list of English words and their associations with eight basic emotions (anger, fear, anticipation, trust, surprise, sadness, joy, and disgust) and two sentiments (negative and positive). The annotations were manually done by crowdsourcing."
-
-We assign an sequential id to each sentence in a speech (`sent.id`) and also calculated the number of words in each sentence as *sentence length* (`word.count`).  
+  
+#Data Processing: Generate a List of Sentences (from class)  
+We want to use sentences as units of analysis for this project, as sentences are natural languge units for organizing thoughts and ideas. For each extracted sentence, we apply sentiment analysis using [NRC sentiment lexion](http://saifmohammad.com/WebPages/NRC-Emotion-Lexicon.htm). "The NRC Emotion Lexicon is a list of English words and their associations with eight basic emotions (anger, fear, anticipation, trust, surprise, sadness, joy, and disgust) and two sentiments (negative and positive)." We also assign an sequential id to each sentence in a speech (`sent.id`) and also calculated the number of words in each sentence as *sentence length* (`word.count`).  
 ```{r}
 #Use get.sentences(dated.speeches.term.f) to get sentence.list 
 sentence.list <- get.sentences(dated.speeches.women.f)
@@ -272,6 +269,9 @@ sentence.list <- get.sentences(dated.speeches.women.f)
 #sentence.list is a list of dfs, each element of list corresponds to an inauguration speech that mentions "women" (and the like)
 #each df in the list has 13 columns : sentences, word.count, anger, anticipation, disgust, fear, joy, sadness, surprise, trust, negative, positive, sent.id
 #each row in each df corresponds to a sentence in the speech
+
+#Export our file into an Excel Workbook in the output folder
+#each sheet in the workbook corresponds to a specific speech
 file.name = "../output/sentence.list.xlsx"
 write.xlsx(sentence.list[[1]],file.name,
            sheetName = names(sentence.list)[1],row.names = F)
@@ -281,12 +281,13 @@ for (i in 2:length(sentence.list)){
 }
 ```
   
+#More Subsetting: Finding Sentences that Contain the Keywords  
 For each of the 16 speeches that mention women, we want to focus on the actual sentences that contain the word "women", "woman", "girls", or "girl". So, we can subset the data from our sentiment analysis on each extracted sentence (stored in *sentence.list*, which is a list of dataframes with each element corresponding to a specific speech) to get sentiment analysis data on each sentence that contains the word "women", "woman", "girls", or "girl".  Call our new list object *sentence.list.women*. Then, *sentence.list.women* contains subsetted data from *sentence.list* that pertains only to the sentences that mention women.   
 ```{r}
 #Use get.sentences.term(sentence.list) to subset sentence.list, extracting only the   sentences that explicitely mention "women"
 sentence.list.women <- get.sentences.term(sentence.list,term.vector)
-
 ```
+  
 Let's check that our new list, *sentence.list.women*, is what we want. The length of our new list should be 16, and each element (dataframe) of our new list should have 13 columns.  
 ```{r}
 #create empty vector for number of columns in each dataframe in sentence.list.women
@@ -311,7 +312,6 @@ We can preview our new list:
 ```{r}
 head(sentence.list.women)
 ```
-
   
 Now, let's export the data from our new list into an Excel workbook in our project's *output* folder. We may put each dataframe in the list, *sentence.list.women*, in it's own sheet of the workbook, and we name the sheet by the file name of the corresponding speech. Call it *sentence.list.women.xlsx*.  
 ```{r}
@@ -377,6 +377,7 @@ Notice that William J Clinton's first-term inauguration speech is the least posi
   
 It appears women are mentioned only once in Clinton's entire speech. In the context of [Clinton's presidency](https://en.wikipedia.org/wiki/Bill_Clinton), this singular mention may or may not be significant. As far as the lack of positivity in this sentence, we can probably attribute that to the choice of strong negative words like  "sacrifice", "depression", "fascism", and "communism", which take away from the few postive ones like "thank", "steadfastness", and "triumphed".  
 
+#Interactive: Exploratory Analysis of Keywords in Inauguration Speeches  
 ```{r}
 library(shiny)
 folder.path="../data/InauguralSpeeches/"
