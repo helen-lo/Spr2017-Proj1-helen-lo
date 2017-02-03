@@ -50,9 +50,8 @@ library(topicmodels)
 library(rsconnect)
 library(xlsx)
 
-
+#Get info from the R script that contains functions called in this html notebook
 source("../lib/Functions.R")
-source("../lib/Functions.2.R")
 ```
 
 *Note*: This notebook was prepared with the following environmental settings.  
@@ -213,7 +212,8 @@ p
 ```
 
 
-#Subsetting the Data: 
+#Subsetting the Data:  
+Since I noticed that "men" appears more that 125 times while "women" does not, I decided to find out how many times "women", and what I call its equivalents, "woman", "girls","girl", appear. Additionally, I was curious as to which particular speeches mentioned women. So in subsetting the data, we can get a closer look at the specific speeches that mention women and even the specific sentences in those speeches that explicitly use the word "women" or its equivalents.   
 ```{r}
 #Select a class of equivalent terms; in this case, we look at "women"
 term.vector <- c("women", "woman", "girls", "girl")
