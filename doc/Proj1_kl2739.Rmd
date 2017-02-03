@@ -200,6 +200,7 @@ findFreqTerms(tdm.all,lowfreq = 125)
   
 There are 48 words with a frequency of 125 or higher across all the inauguration speeches. It doesn't appear that any of the words are unusual, in the sense that it's surprising the word would be in an inauguration speech. Though, I do notice that "men" appears in this list of frequently used words, while "women" does not.  
   
+#Plot Word Frequencies:    
 ```{r}
 #plot word frequencies
 library(ggplot2)
@@ -207,6 +208,7 @@ wf <- data.frame(word=names(freq),freq=freq)
 p <- ggplot(subset(wf,freq>125), aes(word,freq))
 p <- p+ geom_bar(stat="identity")
 p <- p+ theme(axis.text.x=element_text(angle=45,hjust=1))
+p <- p+ ggtitle("Plot of Word Frequencies, for f>125")
 p
 ```
 
